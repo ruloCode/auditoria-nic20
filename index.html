@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Auditoría NIC 20</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Juego de auditoría sobre la NIC 20: revisa cómo una cooperativa contabilizó sus subvenciones del gobierno y emite tu dictamen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Mono:wght@400;600&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: papeles de trabajo de auditoría. Pestaña de carpeta manila arriba, hoja del caso a la
+   izquierda y el tablero contable (ESF + ER) a la derecha; en celular todo en una columna. */
+:root {
+  --paper: #e9eeeb;      /* fondo: papel de libro mayor, gris verdoso */
+  --sheet: #fbfcfb;      /* hoja de trabajo */
+  --ink: #16232a;
+  --muted: #4a5a60;
+  --line: #c6d1cc;
+  --ledger: #1b6650;     /* tinta verde del libro mayor = acento */
+  --ledger-soft: #d5e7de;
+  --on-ledger: #ffffff;
+  --red: #b0261d;        /* lápiz rojo del auditor = hallazgo */
+  --red-soft: #f6dcd8;
+  --manila: #e4cf96;     /* pestaña de carpeta */
+  --on-manila: #3a2f12;
+  --flash: #fbe9a6;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1613; --sheet: #151f1b; --ink: #e2ebe7; --muted: #9db0a8; --line: #2a3a33;
+    --ledger: #63c6a3; --ledger-soft: #16332a; --on-ledger: #08140f;
+    --red: #ff8b80; --red-soft: #3b1a17; --manila: #5e4f26; --on-manila: #f4e8c4; --flash: #4a4219;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e1613; --sheet: #151f1b; --ink: #e2ebe7; --muted: #9db0a8; --line: #2a3a33;
+  --ledger: #63c6a3; --ledger-soft: #16332a; --on-ledger: #08140f;
+  --red: #ff8b80; --red-soft: #3b1a17; --manila: #5e4f26; --on-manila: #f4e8c4; --flash: #4a4219;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--font-body);
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none !important; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.12; }
+p { margin: 0; }
+.label {
+  font: 600 12px/1.3 var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--ledger); outline-offset: 2px; }
+
+.btn {
+  appearance: none; border: 0; cursor: pointer;
+  background: var(--ledger); color: var(--on-ledger);
+  font: 700 16px/1 var(--font-body);
+  padding: 15px 22px; border-radius: var(--r);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 48px;
+}
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+
+/* Barra superior: membrete del papel de trabajo */
+.masthead {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px;
+  border-bottom: 2px solid var(--ink); padding-bottom: 10px;
+}
+.masthead .firma { font: 800 18px/1 var(--font-display); font-stretch: 112%; letter-spacing: -.01em; }
+.masthead .firma span { color: var(--ledger); }
+
+/* ---------- Inicio ---------- */
+.cover { display: grid; gap: 28px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+.cover h1 { font-size: clamp(38px, 7vw, 68px); font-weight: 800; font-stretch: 78%; letter-spacing: -.02em; }
+.cover h1 em { font-style: normal; color: var(--ledger); }
+.cover .lead { font-size: 18px; max-width: 34em; margin-top: 14px; }
+.encargo { display: grid; gap: 10px; margin-top: 22px; max-width: 36em; }
+.encargo dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.encargo dt { color: var(--muted); }
+.encargo dd { margin: 0; }
+.modos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.modo {
+  appearance: none; cursor: pointer; text-align: left;
+  background: var(--sheet); border: 1.5px solid var(--line); border-radius: var(--r);
+  padding: 12px 14px; display: grid; gap: 2px; min-width: 0; flex: 1 1 200px;
+}
+.modo strong { font-weight: 700; }
+.modo span { font-size: 14px; color: var(--muted); }
+.modo[aria-checked="true"] { border-color: var(--ledger); box-shadow: inset 0 0 0 1.5px var(--ledger); }
+.start-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; margin-top: 18px; }
+.best { font-size: 14px; color: var(--muted); }
+
+.indice { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.indice header { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; }
+.indice ol { list-style: none; margin: 0; padding: 0; }
+.indice li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 12px 16px; border-bottom: 1px dashed var(--line); }
+.indice li:last-child { border-bottom: 0; }
+.indice .ref { font: 600 13px var(--font-mono); color: var(--ledger); }
+.indice .t { font-weight: 700; }
+.indice .s { display: block; font-size: 14px; color: var(--muted); }
+.indice .p { font: 400 13px var(--font-mono); color: var(--muted); white-space: nowrap; }
+.fineprint { font-size: 13px; color: var(--muted); max-width: 60em; }
+
+/* ---------- Pestaña de carpeta ---------- */
+.folder { display: grid; }
+.tab {
+  justify-self: start; background: var(--manila); color: var(--on-manila);
+  padding: 8px 16px 6px; border-radius: var(--r) var(--r) 0 0;
+  font: 600 13px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase;
+}
+.folder-body {
+  background: var(--sheet); border: 1px solid var(--line); border-top: 4px solid var(--manila);
+  border-radius: 0 var(--r) var(--r) var(--r);
+}
+
+/* ---------- Interludio de carpeta ---------- */
+.interludio .folder-body { padding: clamp(22px, 5vw, 48px); display: grid; gap: 16px; }
+.interludio h2 { font-size: clamp(30px, 5.5vw, 50px); font-weight: 800; font-stretch: 80%; }
+.interludio .q { font-size: 19px; max-width: 32em; }
+.interludio ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; max-width: 40em; }
+
+/* ---------- Ronda ---------- */
+.hud { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
+.hud .grow { flex: 1 1 auto; }
+.progress { display: flex; gap: 4px; flex-wrap: wrap; }
+.progress i { width: 18px; height: 6px; border-radius: 2px; background: var(--line); display: block; }
+.progress i.ok { background: var(--ledger); }
+.progress i.bad { background: var(--red); }
+.progress i.now { background: var(--ink); }
+.vidas { display: flex; gap: 6px; align-items: center; }
+.vidas b { font: 800 15px var(--font-display); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--ledger); color: var(--ledger); }
+.vidas b.off { border-color: var(--line); color: var(--line); }
+.puntos { font: 700 20px var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.ronda .folder-body { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+.caso { padding: clamp(18px, 3.4vw, 32px); display: grid; gap: 18px; align-content: start; border-right: 1px solid var(--line); min-width: 0; }
+.caso h2 { font-size: clamp(24px, 3.6vw, 32px); font-weight: 800; font-stretch: 88%; }
+.hechos { display: grid; gap: 10px; max-width: 62ch; }
+.cliente {
+  border: 1.5px dashed var(--muted); border-radius: var(--r); padding: 12px 14px;
+  font-size: 15px; display: grid; gap: 4px; background: var(--paper);
+}
+.cliente code { font-family: var(--font-mono); font-size: 14px; }
+.pregunta { font-weight: 700; font-size: 18px; }
+.opciones { display: grid; gap: 10px; }
+.op {
+  appearance: none; cursor: pointer; text-align: left;
+  display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start;
+  background: var(--sheet); border: 1.5px solid var(--line); border-radius: var(--r);
+  padding: 12px 14px; font-size: 15.5px; line-height: 1.45;
+}
+.op .k { font: 600 13px/28px var(--font-mono); width: 28px; height: 28px; border-radius: 50%; text-align: center; border: 1.5px solid var(--line); color: var(--muted); }
+.op:hover:not(:disabled) { border-color: var(--muted); }
+.op[aria-checked="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.op[aria-checked="true"] .k { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.op:disabled { cursor: default; }
+.op.es-ok { border-color: var(--ledger); background: var(--ledger-soft); box-shadow: none; }
+.op.es-ok .k { background: var(--ledger); border-color: var(--ledger); color: var(--on-ledger); }
+.op.es-mal { border-color: var(--red); background: var(--red-soft); box-shadow: none; }
+.op.es-mal .k { background: var(--red); border-color: var(--red); color: var(--sheet); }
+.acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hint { font-size: 13px; color: var(--muted); }
+
+/* Tablero contable */
+.tablero { padding: clamp(18px, 3.4vw, 32px); display: grid; gap: 14px; align-content: start; min-width: 0; background: color-mix(in srgb, var(--paper) 45%, var(--sheet)); }
+.tablero h3 { font-size: 20px; font-weight: 800; font-stretch: 92%; }
+.tablero .sub { font-size: 14px; color: var(--muted); }
+.tabla-wrap { overflow-x: auto; }
+table.libro { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+table.libro th, table.libro td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+table.libro th { text-align: left; font: 600 11.5px var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+table.libro th.v, table.libro td.v { text-align: right; white-space: nowrap; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+table.libro tr.grupo td { font: 600 12px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ledger); padding-top: 14px; border-bottom: 0; }
+table.libro tr.total td { font-weight: 700; border-top: 2px solid var(--ink); border-bottom: 3px double var(--ink); }
+table.libro td.dif { color: var(--red); font-weight: 600; }
+table.libro td.flash { animation: flash 900ms ease-out; }
+@keyframes flash { from { background: var(--flash); } to { background: transparent; } }
+.nota-tab { font-size: 14px; color: var(--muted); border-left: 3px solid var(--manila); padding-left: 10px; }
+.vacio { font-size: 15px; color: var(--muted); padding: 18px 0; }
+
+/* Retroalimentación */
+.feedback { border-top: 1px solid var(--line); padding: clamp(18px, 3.4vw, 32px); display: grid; gap: 16px; grid-column: 1 / -1; }
+.veredicto { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.sello {
+  font: 800 15px/1 var(--font-display); font-stretch: 110%; letter-spacing: .06em; text-transform: uppercase;
+  padding: 9px 14px; border: 2.5px solid currentColor; border-radius: 4px; transform: rotate(-2deg);
+}
+.sello.ok { color: var(--ledger); }
+.sello.mal { color: var(--red); }
+.veredicto .pts { font: 700 18px var(--font-mono); }
+.fb-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+.fb-texto { display: grid; gap: 10px; max-width: 64ch; }
+.norma { display: grid; gap: 10px; align-content: start; }
+.norma blockquote { margin: 0; padding: 10px 14px; border-left: 3px solid var(--ledger); background: var(--sheet); font-size: 15px; }
+.norma blockquote b { font: 600 12.5px var(--font-mono); color: var(--ledger); display: block; margin-bottom: 2px; letter-spacing: .03em; }
+
+/* Laboratorio */
+.lab { border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 14px; background: var(--sheet); }
+.lab .controles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 18px; }
+.lab label { display: grid; gap: 4px; font-size: 14px; }
+.lab label output { font: 600 14px var(--font-mono); }
+.lab input[type=range] { width: 100%; accent-color: var(--ledger); }
+.lab .metodos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.lab .conclusion { font-size: 15px; }
+
+/* ---------- Resultados ---------- */
+.final .folder-body { padding: clamp(20px, 4.5vw, 44px); display: grid; gap: 26px; }
+.final h2 { font-size: clamp(32px, 6vw, 56px); font-weight: 800; font-stretch: 80%; }
+.stats { display: flex; flex-wrap: wrap; gap: 14px 36px; }
+.stats div { display: grid; gap: 2px; }
+.stats b { font: 700 32px var(--font-mono); font-variant-numeric: tabular-nums; }
+.repaso { display: grid; gap: 10px; }
+.repaso ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+@media (max-width: 860px) {
+  .cover, .fb-grid { grid-template-columns: minmax(0, 1fr); }
+  .ronda .folder-body { grid-template-columns: minmax(0, 1fr); }
+  .caso { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (prefers-reduced-motion: reduce) {
+  table.libro td.flash { animation: none; }
+  .sello { transform: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="firma">Revisoría <span>&amp;</span> Asociados</div>
+    <div class="label">Papeles de trabajo · Encargo 2025-114 · NIC 20</div>
+  </header>
+
+  <!-- INICIO -->
+  <section id="inicio" class="cover">
+    <div>
+      <p class="label">Auditoría de estados financieros · Período 2025</p>
+      <h1>Las subvenciones de <em>La Ceiba</em> no cuadran.</h1>
+      <p class="lead">Llegas como auditor a una cooperativa agroindustrial que recibió plata, un tractor y un crédito barato del gobierno. Abre cada carpeta, revisa cómo se contabilizó y emite tu dictamen con la NIC 20 en la mano.</p>
+      <div class="encargo">
+        <dl>
+          <dt>Cliente</dt><dd>Cooperativa Agroindustrial La Ceiba (ficticia)</dd>
+          <dt>Marco</dt><dd>NIIF plenas (Grupo 1), NIC 20</dd>
+          <dt>Cifras</dt><dd>Millones de pesos (COP). Sin efectos tributarios.</dd>
+          <dt>Duración</dt><dd>15 casos, unos 8 minutos</dd>
+        </dl>
+      </div>
+      <div class="modos" role="radiogroup" aria-label="Modo de juego">
+        <button class="modo" id="modo-examen" role="radio" aria-checked="true" data-modo="examen">
+          <strong>Examen</strong><span>3 firmas de respaldo. Con tres hallazgos en tu contra, te retiran del encargo.</span>
+        </button>
+        <button class="modo" id="modo-practica" role="radio" aria-checked="false" data-modo="practica">
+          <strong>Práctica</strong><span>Sin límite de errores. Para estudiar los 15 casos completos.</span>
+        </button>
+      </div>
+      <div class="start-row">
+        <button class="btn" id="btn-empezar">Abrir el expediente</button>
+        <span class="best" id="best-inicio"></span>
+      </div>
+    </div>
+    <aside class="indice" aria-label="Índice del expediente">
+      <header><span class="label">Índice del expediente</span><span class="label">NIC 20</span></header>
+      <ol id="indice"></ol>
+    </aside>
+    <p class="fineprint" style="grid-column: 1 / -1">Los textos de la norma que aparecen en el juego son síntesis de los párrafos de la NIC 20, no el texto oficial. Para citar en un trabajo académico, usa la versión en español publicada por la Fundación IFRS. Las entidades y cifras son ficticias.</p>
+  </section>
+
+  <!-- INTERLUDIO DE CARPETA -->
+  <section id="interludio" class="folder interludio" hidden>
+    <div class="tab" id="int-tab"></div>
+    <div class="folder-body">
+      <p class="label" id="int-parrafos"></p>
+      <h2 id="int-titulo"></h2>
+      <p class="q" id="int-pregunta"></p>
+      <ul id="int-claves"></ul>
+      <div><button class="btn" id="btn-abrir">Revisar la carpeta</button></div>
+    </div>
+  </section>
+
+  <!-- RONDA -->
+  <section id="ronda" hidden>
+    <div class="hud" style="margin-bottom: 14px">
+      <div class="progress grow" id="progress" aria-label="Avance"></div>
+      <div class="vidas" id="vidas" aria-label="Firmas de respaldo"></div>
+      <div class="puntos" id="puntos" aria-label="Puntaje">0</div>
+    </div>
+    <div class="folder ronda">
+      <div class="tab" id="caso-tab"></div>
+      <div class="folder-body">
+        <div class="caso">
+          <p class="label" id="caso-ref"></p>
+          <h2 id="caso-titulo"></h2>
+          <div class="hechos" id="caso-hechos"></div>
+          <div class="cliente" id="caso-cliente" hidden></div>
+          <p class="pregunta" id="caso-pregunta"></p>
+          <div class="opciones" id="opciones" role="radiogroup" aria-labelledby="caso-pregunta"></div>
+          <div class="acciones">
+            <button class="btn" id="btn-dictamen" disabled>Emitir dictamen</button>
+            <span class="hint">Teclas 1–4 para elegir, Enter para confirmar.</span>
+          </div>
+        </div>
+        <div class="tablero" aria-live="polite">
+          <div>
+            <h3 id="tab-titulo">Tablero contable</h3>
+            <p class="sub" id="tab-sub">Elige una opción para ver cómo quedarían los estados financieros.</p>
+          </div>
+          <div id="tab-cuerpo"></div>
+        </div>
+        <div class="feedback" id="feedback" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section id="final" class="folder final" hidden>
+    <div class="tab">Informe de revisión de calidad</div>
+    <div class="folder-body">
+      <div>
+        <p class="label" id="fin-estado"></p>
+        <h2 id="fin-rango"></h2>
+        <p id="fin-frase" style="margin-top: 10px; max-width: 46em; font-size: 18px"></p>
+      </div>
+      <div class="stats">
+        <div><span class="label">Puntaje</span><b id="fin-puntos"></b></div>
+        <div><span class="label">Aciertos</span><b id="fin-aciertos"></b></div>
+        <div><span class="label">Mejor racha</span><b id="fin-racha"></b></div>
+        <div><span class="label">Tu récord</span><b id="fin-record"></b></div>
+      </div>
+      <div class="tabla-wrap">
+        <table class="libro" id="fin-carpetas"></table>
+      </div>
+      <div class="repaso" id="fin-repaso"></div>
+      <div class="acciones">
+        <button class="btn" id="btn-otra">Jugar otra vez</button>
+        <button class="btn ghost" id="btn-inicio">Volver a la portada</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* =====================================================================
+   CONTENIDO. Cada caso: hechos, registro del cliente (opcional), pregunta,
+   4 opciones con su tablero, explicación y párrafos de la NIC 20.
+   Cifras en millones de COP. Tablero: esf = [concepto, valor, clase]
+   con clase A (activo) · P (pasivo) · Pt (patrimonio); er = [concepto, valor]
+   con signo (ingreso +, gasto −). El efecto en resultados se suma solo.
+   ===================================================================== */
+
+const NORMA = {
+  "7":   "Las subvenciones, incluidas las no monetarias medidas a valor razonable, no se reconocen hasta que exista seguridad razonable de que la entidad cumplirá las condiciones asociadas y de que la subvención se recibirá.",
+  "8":   "Recibir la subvención no es, por sí mismo, evidencia concluyente de que las condiciones se han cumplido o se van a cumplir.",
+  "9":   "La forma en que se recibe la subvención (en efectivo o como reducción de una deuda con el gobierno) no cambia el método contable.",
+  "10":  "Un préstamo condonable del gobierno se trata como subvención cuando hay seguridad razonable de que la entidad cumplirá los términos para que se lo condonen.",
+  "10A": "El beneficio de un préstamo del gobierno a una tasa menor que la de mercado se trata como subvención. El préstamo se reconoce y mide según la NIIF 9, y el beneficio es la diferencia entre ese importe inicial en libros y el dinero recibido.",
+  "12":  "Las subvenciones se reconocen en resultados de forma sistemática, a lo largo de los periodos en que la entidad reconoce como gasto los costos que la subvención busca compensar.",
+  "15":  "La norma descarta el enfoque de capital: una subvención no viene de los propietarios y se gana cumpliendo condiciones, así que no va directo al patrimonio sino a resultados.",
+  "17":  "Las subvenciones ligadas a activos depreciables se reconocen en resultados en los mismos periodos y proporciones en que se reconoce la depreciación de esos activos.",
+  "18":  "Las ligadas a activos no depreciables pueden exigir obligaciones; entonces se llevan a resultados en los periodos que soportan el costo de cumplirlas. El ejemplo de la norma: un terreno subvencionado con la condición de construir un edificio se reconoce durante la vida útil del edificio.",
+  "20":  "Una subvención que compensa gastos o pérdidas ya incurridos, o que da apoyo financiero inmediato sin costos futuros relacionados, se reconoce en resultados del periodo en que se vuelve exigible.",
+  "23":  "Una subvención no monetaria normalmente se registra a su valor razonable. Como alternativa, se permite registrar el activo y la subvención por un importe nominal.",
+  "24":  "Las subvenciones relacionadas con activos se presentan en el estado de situación financiera como ingreso diferido o deduciéndolas del importe en libros del activo.",
+  "26":  "Con el método de ingreso diferido, la subvención se lleva a resultados de forma sistemática durante la vida útil del activo.",
+  "27":  "Con el método de deducción, la subvención llega a resultados durante la vida del activo a través de un gasto por depreciación menor.",
+  "29":  "Las subvenciones relacionadas con ingresos se presentan en resultados, por separado o bajo un título como «otros ingresos», o se restan del gasto relacionado.",
+  "32":  "Una subvención que se vuelve reembolsable se trata como un cambio en una estimación contable (NIC 8), no como un error. Si se relaciona con ingresos, el reembolso se aplica primero contra el ingreso diferido pendiente y el exceso va a resultados. Si se relaciona con un activo, se aumenta el importe en libros del activo o se reduce el ingreso diferido, y la depreciación adicional que se habría reconocido sin la subvención va de inmediato a resultados.",
+  "35":  "Algunas formas de asistencia del gobierno no pueden medirse razonablemente, como la asesoría técnica o comercial gratuita y el otorgamiento de garantías. Por eso no se reconocen como subvención.",
+  "36":  "Aun así, la asistencia puede ser tan importante que se revela su naturaleza, alcance y duración para que los estados financieros no induzcan a error.",
+  "39":  "Se revela: (a) la política contable adoptada, incluido el método de presentación; (b) la naturaleza y alcance de las subvenciones reconocidas y de otras formas de asistencia recibidas; (c) las condiciones incumplidas y otras contingencias."
+};
+
+const CARPETAS = [
+  { n: 1, titulo: "Reconocimiento", parrafos: "¶7 – ¶11",
+    pregunta: "¿Ya hay una subvención en los libros, y desde cuándo?",
+    claves: ["Seguridad razonable de cumplir las condiciones y de recibirla (¶7).", "Recibir el dinero no prueba que se cumplirá (¶8).", "Los préstamos condonables pueden ser subvenciones (¶10)."] },
+  { n: 2, titulo: "Subvenciones relacionadas con ingresos", parrafos: "¶12 · ¶20 · ¶29",
+    pregunta: "¿En qué periodo llega cada peso a resultados, y cómo se presenta?",
+    claves: ["Se asocia a los costos que compensa (¶12).", "Si compensa algo ya ocurrido, va al resultado cuando es exigible (¶20).", "Se presenta como otro ingreso o restada del gasto (¶29)."] },
+  { n: 3, titulo: "Subvenciones relacionadas con activos", parrafos: "¶17 · ¶18 · ¶24 – ¶27",
+    pregunta: "¿Ingreso diferido o menor valor del activo?",
+    claves: ["Dos presentaciones permitidas: ingreso diferido o deducción (¶24).", "El efecto en resultados es el mismo; cambia el estado de situación.", "Terrenos con condiciones: se sigue la vida del activo que obligan a construir (¶18)."] },
+  { n: 4, titulo: "No monetarias, créditos y asistencia", parrafos: "¶10A · ¶23 · ¶34 – ¶36",
+    pregunta: "¿Cuánto vale lo que el gobierno no cobró?",
+    claves: ["Bienes recibidos: valor razonable o importe nominal (¶23).", "Crédito a tasa subsidiada: la diferencia con la NIIF 9 es subvención (¶10A).", "La asistencia que no se puede medir se revela, no se registra (¶35 – ¶36)."] },
+  { n: 5, titulo: "Devoluciones y revisión final", parrafos: "¶32 · ¶39",
+    pregunta: "El gobierno pide la plata de vuelta. ¿Y ahora qué?",
+    claves: ["Es un cambio de estimación, no un error de periodos anteriores (¶32).", "Primero se cancela el ingreso diferido; el resto va a resultados.", "Última carpeta: encuentra el error en el borrador de notas."] }
+];
+
+const T = (titulo, esf, er, nota) => ({ titulo, esf: esf || [], er: er || [], nota });
+
+const CASOS = [
+  /* ---------------- Carpeta 1 ---------------- */
+  {
+    id: "1.1", carpeta: 1, titulo: "Jóvenes al campo",
+    hechos: [
+      "El 15 de diciembre de 2025 la cooperativa recibió $200 del Fondo Regional de Fomento Agrícola para contratar 20 jóvenes rurales durante todo 2026. Si no los contrata, debe devolver el dinero.",
+      "Al cierre del 31 de diciembre todavía no ha contratado a nadie, aunque la convocatoria ya está abierta y la gerencia espera cumplir."
+    ],
+    cliente: "Débito Bancos $200 · Crédito Ingreso por subvenciones $200, en 2025.",
+    pregunta: "¿Cuál es tu dictamen sobre el registro de 2025?",
+    opciones: [
+      { txt: "Aprobarlo: el dinero ya está en el banco, así que el ingreso es de 2025.",
+        por: "El dinero en el banco no basta. El ¶8 dice que recibirlo no prueba que se cumplirán las condiciones, y los salarios que compensa son de 2026.",
+        t: T("Al 31-dic-2025", [["Bancos", 200, "A"]], [["Ingreso por subvenciones", 200]]) },
+      { ok: true, txt: "Ajustarlo: llevar los $200 a un pasivo (ingreso diferido) y reconocerlos en resultados durante 2026, a medida que se paguen los salarios.",
+        por: "Correcto. En 2025 no se ha incurrido ningún costo que compensar.",
+        t: T("Al 31-dic-2025", [["Bancos", 200, "A"], ["Ingreso diferido (subvención)", 200, "P"]], [["Ingreso por subvenciones", 0]]) },
+      { txt: "Ajustarlo: llevar los $200 directo al patrimonio como superávit por donaciones.",
+        por: "La NIC 20 descarta el enfoque de capital (¶15): las subvenciones pasan por resultados, no por el patrimonio.",
+        t: T("Al 31-dic-2025", [["Bancos", 200, "A"], ["Superávit por donaciones", 200, "Pt"]], [["Ingreso por subvenciones", 0]]) },
+      { txt: "Ajustarlo: reversar todo; no se registra nada hasta 2026.",
+        por: "El efectivo existe y tiene que estar en los libros. Lo que falta decidir es la contrapartida, y es un pasivo.",
+        t: T("Al 31-dic-2025", [["Bancos (efectivo sin registrar)", 0, "A"]], [["Ingreso por subvenciones", 0]], "Los $200 quedan fuera de la contabilidad aunque están en la cuenta bancaria.") }
+    ],
+    explicacion: "El ¶12 asocia la subvención a los gastos que compensa, y esos salarios se pagan en 2026. Mientras tanto, el dinero recibido es un ingreso diferido. Si la cooperativa ni siquiera tuviera seguridad razonable de cumplir, también sería un pasivo, porque tendría que devolverlo.",
+    norma: ["7", "8", "12"]
+  },
+  {
+    id: "1.2", carpeta: 1, titulo: "La ola invernal",
+    hechos: [
+      "En abril de 2025 la ola invernal destruyó cultivos de la cooperativa. La pérdida de $80 ya se registró como gasto en 2025.",
+      "En noviembre la Gobernación expidió una resolución en firme que le otorga $80 como compensación, sin condiciones futuras. El pago llegará en febrero de 2026."
+    ],
+    cliente: "No registró nada en 2025. Piensa reconocer el ingreso cuando llegue el dinero.",
+    pregunta: "¿Cuál es tu dictamen?",
+    opciones: [
+      { txt: "Aprobarlo: sin efectivo recibido no hay subvención que registrar.",
+        por: "El ¶9 aclara que la forma o el momento del cobro no cambian el método. La resolución en firme hace exigible la subvención en 2025.",
+        t: T("Año 2025", [], [["Pérdida por ola invernal", -80], ["Ingreso por subvenciones", 0]]) },
+      { ok: true, txt: "Ajustarlo: reconocer una cuenta por cobrar de $80 y el ingreso en 2025.",
+        por: "Correcto. Compensa una pérdida ya ocurrida, así que va al resultado del periodo en que se vuelve exigible (¶20).",
+        t: T("Año 2025", [["Cuenta por cobrar (subvención)", 80, "A"]], [["Pérdida por ola invernal", -80], ["Ingreso por subvenciones", 80]]) },
+      { txt: "Ajustarlo: cuenta por cobrar contra un ingreso diferido, que se reconoce en 2026.",
+        por: "No hay costos futuros que compensar; diferirla separa el ingreso de la pérdida que cubre.",
+        t: T("Año 2025", [["Cuenta por cobrar (subvención)", 80, "A"], ["Ingreso diferido (subvención)", 80, "P"]], [["Pérdida por ola invernal", -80], ["Ingreso por subvenciones", 0]]) },
+      { txt: "Ajustarlo: registrarla en 2026 directamente en el patrimonio.",
+        por: "Ni el periodo ni la cuenta son correctos: va a resultados (¶15) y en 2025 (¶20).",
+        t: T("Año 2025", [], [["Pérdida por ola invernal", -80], ["Ingreso por subvenciones", 0]], "En 2026 aparecería un superávit de $80 sin pasar por resultados.") }
+    ],
+    explicacion: "La subvención compensa una pérdida que ya está en los resultados de 2025 y no exige nada a futuro. Con la resolución en firme existe seguridad razonable de recibirla (¶7), así que es ingreso de 2025 aunque el dinero llegue en 2026. Ingreso y pérdida quedan en el mismo periodo.",
+    norma: ["20", "9", "7"]
+  },
+  {
+    id: "1.3", carpeta: 1, titulo: "El préstamo que no se paga",
+    hechos: [
+      "El 1 de enero de 2025 el Fondo le presta $150 a la cooperativa. El préstamo se condona por completo si mantiene al menos 50 empleados durante 2025, 2026 y 2027; si no, lo paga al final con intereses.",
+      "La cooperativa tiene 64 empleados con contrato indefinido y un plan de expansión aprobado. Tú y la gerencia concluyen que hay seguridad razonable de cumplir. La nómina de esos empleos es similar cada año."
+    ],
+    cliente: "Débito Bancos $150 · Crédito Obligaciones financieras $150. Piensa reconocer el ingreso en 2027, cuando le condonen.",
+    pregunta: "¿Qué debe mostrar el cierre de 2025?",
+    opciones: [
+      { txt: "Aprobarlo: es un préstamo hasta que lo condonen formalmente.",
+        por: "Con seguridad razonable de cumplir, el ¶10 obliga a tratarlo como subvención desde el principio.",
+        t: T("Al 31-dic-2025", [["Bancos", 150, "A"], ["Obligaciones financieras", 150, "P"]], [["Ingreso por subvenciones", 0]]) },
+      { ok: true, txt: "Tratarlo como subvención: ingreso diferido que se lleva a resultados durante los tres años en que se paga la nómina que compensa.",
+        por: "Correcto. $50 por año, porque la nómina es pareja.",
+        t: T("Al 31-dic-2025", [["Bancos", 150, "A"], ["Ingreso diferido (subvención)", 100, "P"]], [["Ingreso por subvenciones", 50]]) },
+      { txt: "Tratarlo como subvención y reconocer los $150 completos en 2025.",
+        por: "Es subvención, pero compensa costos de tres años. Reconocerla toda en 2025 rompe el ¶12.",
+        t: T("Al 31-dic-2025", [["Bancos", 150, "A"]], [["Ingreso por subvenciones", 150]]) },
+      { txt: "Reconocer los $150 en el patrimonio, porque nunca se va a pagar.",
+        por: "No va al patrimonio (¶15): pasa por resultados a lo largo de los tres años.",
+        t: T("Al 31-dic-2025", [["Bancos", 150, "A"], ["Superávit por donaciones", 150, "Pt"]], [["Ingreso por subvenciones", 0]]) }
+    ],
+    explicacion: "La forma legal es un préstamo, pero la sustancia es una subvención para mantener empleo. Como existe seguridad razonable de cumplir, se trata como subvención (¶10) y se reconoce a medida que se paga la nómina que compensa (¶12): $50 en 2025 y $100 que siguen diferidos.",
+    norma: ["10", "12"]
+  },
+
+  /* ---------------- Carpeta 2 ---------------- */
+  {
+    id: "2.1", carpeta: 2, titulo: "Técnicos de campo",
+    hechos: [
+      "El 1 de julio de 2025 la cooperativa recibió $120 para pagar el salario de cuatro técnicos agrónomos durante 12 meses, de julio de 2025 a junio de 2026.",
+      "Los salarios suman $10 al mes y se pagaron cumplidamente. El cierre es el 31 de diciembre."
+    ],
+    cliente: null,
+    pregunta: "¿Cuánto ingreso por subvención corresponde a 2025?",
+    opciones: [
+      { txt: "$0: se reconoce cuando termine el convenio, en junio de 2026.",
+        por: "Esperar al final del convenio deja seis meses de salarios en 2025 sin su compensación.",
+        t: T("Al 31-dic-2025", [["Ingreso diferido (subvención)", 120, "P"]], [["Gasto de salarios técnicos", -60], ["Ingreso por subvenciones", 0]]) },
+      { ok: true, txt: "$60: la mitad, porque en 2025 se pagaron 6 de los 12 meses de salario.",
+        por: "Correcto. El ingreso sigue al gasto que compensa.",
+        t: T("Al 31-dic-2025", [["Ingreso diferido (subvención)", 60, "P"]], [["Gasto de salarios técnicos", -60], ["Ingreso por subvenciones", 60]]) },
+      { txt: "$120: todo, porque se recibió en 2025.",
+        por: "Recibir el dinero no lo convierte en ingreso; la mitad compensa salarios de 2026.",
+        t: T("Al 31-dic-2025", [["Ingreso diferido (subvención)", 0, "P"]], [["Gasto de salarios técnicos", -60], ["Ingreso por subvenciones", 120]]) },
+      { txt: "$0 en resultados: los $120 van al patrimonio.",
+        por: "El patrimonio no es una opción para la NIC 20 (¶15).",
+        t: T("Al 31-dic-2025", [["Superávit por donaciones", 120, "Pt"]], [["Gasto de salarios técnicos", -60], ["Ingreso por subvenciones", 0]]) }
+    ],
+    explicacion: "En 2025 se incurrieron $60 de salarios (julio a diciembre), así que se reconocen $60 de la subvención. Los otros $60 quedan como ingreso diferido y se reconocen en el primer semestre de 2026, cuando se paguen esos salarios. En 2025 el efecto neto es cero.",
+    norma: ["12"]
+  },
+  {
+    id: "2.2", carpeta: 2, titulo: "La capacitación reembolsada",
+    hechos: [
+      "En 2025 la cooperativa pagó $50 por un programa de buenas prácticas agrícolas para sus asociados.",
+      "Una agencia del gobierno le reembolsó $40 de ese costo. El reembolso fue exigible y se cobró en 2025."
+    ],
+    cliente: "En el estado de resultados presenta «Gasto de capacitación, neto: $10» y explica en la nota de políticas que resta los reembolsos del gasto.",
+    pregunta: "¿Cuál es tu dictamen sobre la presentación?",
+    opciones: [
+      { ok: true, txt: "Aprobarla: la NIC 20 permite restar la subvención del gasto relacionado, y la política está revelada.",
+        por: "Correcto. Es una de las dos presentaciones que permite el ¶29.",
+        t: T("Año 2025", [], [["Gasto de capacitación (neto)", -10]], "Nota de políticas: reembolsos restados del gasto relacionado (¶39a).") },
+      { txt: "Ajustarla: debe presentarse obligatoriamente como «Otros ingresos» de $40 y gasto de $50.",
+        por: "Es una presentación válida, pero no obligatoria. Mira el tablero: el resultado neto es el mismo, −$10.",
+        t: T("Año 2025", [], [["Gasto de capacitación", -50], ["Otros ingresos: subvenciones", 40]]) },
+      { txt: "Ajustarla: los $40 son ingresos de actividades ordinarias.",
+        por: "Las actividades ordinarias de la cooperativa son producir y vender, no recibir subvenciones.",
+        t: T("Año 2025", [], [["Ingresos de actividades ordinarias", 40], ["Gasto de capacitación", -50]]) },
+      { txt: "Ajustarla: los $40 van al patrimonio y el gasto se muestra por $50.",
+        por: "Las subvenciones pasan por resultados (¶15).",
+        t: T("Año 2025", [["Superávit por donaciones", 40, "Pt"]], [["Gasto de capacitación", -50]]) }
+    ],
+    explicacion: "El ¶29 da dos opciones para las subvenciones relacionadas con ingresos: presentarlas como un ingreso (por separado o como «otros ingresos») o restarlas del gasto que compensan. Las dos dan el mismo resultado; lo que cambia es la lectura del estado de resultados. Por eso el ¶39(a) exige revelar el método elegido.",
+    norma: ["29", "39"]
+  },
+  {
+    id: "2.3", carpeta: 2, titulo: "Certificación orgánica",
+    hechos: [
+      "En enero de 2025 la cooperativa recibió $90 para un programa de certificación orgánica de tres años, cuyo costo total es $180.",
+      "El costo se reparte así: 20 % en 2025, 30 % en 2026 y 50 % en 2027. En 2025 se gastaron $36, justo lo presupuestado."
+    ],
+    cliente: null,
+    pregunta: "¿Cuánto ingreso por subvención se reconoce en 2025?",
+    opciones: [
+      { txt: "$30: un tercio por año, en línea recta.",
+        por: "La línea recta solo sirve si los costos se incurren parejo. Aquí 2025 lleva el 20 %, no el 33 %.",
+        t: T("Al 31-dic-2025", [["Ingreso diferido (subvención)", 60, "P"]], [["Costos del programa", -36], ["Ingreso por subvenciones", 30]]) },
+      { ok: true, txt: "$18: el 20 % de $90, en proporción al costo incurrido.",
+        por: "Correcto. La base sistemática sigue el patrón de los costos que compensa.",
+        t: T("Al 31-dic-2025", [["Ingreso diferido (subvención)", 72, "P"]], [["Costos del programa", -36], ["Ingreso por subvenciones", 18]]) },
+      { txt: "$90: todo, porque ya se recibió.",
+        por: "La subvención compensa tres años de costos, no solo los de 2025.",
+        t: T("Al 31-dic-2025", [["Ingreso diferido (subvención)", 0, "P"]], [["Costos del programa", -36], ["Ingreso por subvenciones", 90]]) },
+      { txt: "$36: lo mismo que el costo incurrido.",
+        por: "La subvención cubre la mitad del programa ($90 de $180), así que compensa la mitad de cada peso gastado, no el peso completo.",
+        t: T("Al 31-dic-2025", [["Ingreso diferido (subvención)", 54, "P"]], [["Costos del programa", -36], ["Ingreso por subvenciones", 36]]) }
+    ],
+    explicacion: "«De forma sistemática» no quiere decir en línea recta. El ¶12 pide reconocer la subvención en los periodos y proporciones en que se reconocen los costos relacionados. En 2025 se incurrió el 20 % del costo, así que se reconoce el 20 % de la subvención: $18.",
+    norma: ["12"]
+  },
+
+  /* ---------------- Carpeta 3 ---------------- */
+  {
+    id: "3.1", carpeta: 3, titulo: "La secadora: ingreso diferido",
+    hechos: [
+      "El 1 de enero de 2025 la cooperativa compró una secadora de café por $500. El Fondo le dio $200 para comprarla.",
+      "Vida útil de 10 años, sin valor residual, depreciación en línea recta. La política de la cooperativa es presentar la subvención como ingreso diferido."
+    ],
+    cliente: null,
+    pregunta: "¿Cuál es el saldo del ingreso diferido al 31 de diciembre de 2025?",
+    opciones: [
+      { txt: "$200: se reconoce cuando termine la vida útil de la secadora.",
+        por: "Con ingreso diferido, la subvención se amortiza durante la vida útil, no al final (¶26).",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 450, "A"], ["Ingreso diferido (subvención)", 200, "P"]], [["Depreciación", -50], ["Ingreso por subvenciones", 0]]) },
+      { ok: true, txt: "$180: se amortizan $20 por año, en la misma proporción que la depreciación.",
+        por: "Correcto. $200 entre 10 años.",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 450, "A"], ["Ingreso diferido (subvención)", 180, "P"]], [["Depreciación", -50], ["Ingreso por subvenciones", 20]]) },
+      { txt: "$0: los $200 son ingreso de 2025, el año en que se compró.",
+        por: "La secadora sirve diez años; la subvención sigue a su depreciación (¶17).",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 450, "A"], ["Ingreso diferido (subvención)", 0, "P"]], [["Depreciación", -50], ["Ingreso por subvenciones", 200]]) },
+      { txt: "$160: se amortiza el doble para compensar el primer año de uso.",
+        por: "No existe esa regla. La proporción es la de la depreciación: 1/10 por año.",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 450, "A"], ["Ingreso diferido (subvención)", 160, "P"]], [["Depreciación", -50], ["Ingreso por subvenciones", 40]]) }
+    ],
+    explicacion: "La secadora se deprecia $50 por año, y la subvención llega a resultados al mismo ritmo: $20 por año (¶17, ¶26). El efecto neto anual es −$30, que es el costo que realmente asumió la cooperativa ($300) repartido en diez años.",
+    norma: ["17", "24", "26"]
+  },
+  {
+    id: "3.2", carpeta: 3, titulo: "La secadora: deducción del activo",
+    hechos: [
+      "Misma secadora: costo $500, subvención $200, 10 años, sin valor residual, línea recta.",
+      "Esta vez la política de la cooperativa es restar la subvención del valor en libros del activo."
+    ],
+    cliente: "Depreciación 2025: $30. Valor en libros al cierre: $270. Además, reconoció un ingreso por subvenciones de $20.",
+    pregunta: "¿Cuál es tu dictamen?",
+    opciones: [
+      { txt: "Aprobarlo: depreciación de $30, activo de $270 e ingreso de $20 están bien.",
+        por: "La depreciación y el activo están bien, pero el ingreso de $20 cuenta la subvención dos veces: ya llegó a resultados al reducir la depreciación.",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 270, "A"]], [["Depreciación", -30], ["Ingreso por subvenciones", 20]]) },
+      { ok: true, txt: "Ajustarlo: eliminar el ingreso de $20. Con este método la subvención llega a resultados solo a través de la menor depreciación.",
+        por: "Correcto. Depreciación de $30 y activo de $270, sin ingreso aparte.",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 270, "A"]], [["Depreciación", -30]]) },
+      { txt: "Ajustarlo: la depreciación debe ser $50 sobre el costo total y el activo debe quedar en $250.",
+        por: "Con el método de deducción el activo vale $300 desde el inicio, y eso es lo que se deprecia.",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 250, "A"]], [["Depreciación", -50]]) },
+      { txt: "Ajustarlo: no se puede restar la subvención del activo; hay que usar ingreso diferido.",
+        por: "La NIC 20 permite los dos métodos (¶24). La NIIF para las Pymes sí lo restringe, pero aquí aplica la NIC 20.",
+        t: T("Al 31-dic-2025", [["Secadora, neto", 450, "A"], ["Ingreso diferido (subvención)", 180, "P"]], [["Depreciación", -50], ["Ingreso por subvenciones", 20]]) }
+    ],
+    explicacion: "Con el método de deducción, el activo entra por $300 y se deprecia $30 por año (¶27). La subvención ya está en resultados porque la depreciación es $20 menor de lo que sería sin ella. Si además se registra un ingreso de $20, la subvención se cuenta dos veces. Mueve los controles para comparar los dos métodos: el resultado es idéntico y lo que cambia es el estado de situación.",
+    norma: ["24", "27"],
+    lab: true
+  },
+  {
+    id: "3.3", carpeta: 3, titulo: "Un terreno para el centro de acopio",
+    hechos: [
+      "En enero de 2025 la cooperativa recibió $300 para comprar un terreno, con la condición de construir y operar ahí un centro de acopio. Compró el terreno ese mismo mes.",
+      "El centro de acopio quedó terminado el 31 de diciembre de 2025, con una vida útil de 20 años. Empieza a depreciarse en 2026."
+    ],
+    cliente: null,
+    pregunta: "¿Cómo llega la subvención a resultados?",
+    opciones: [
+      { txt: "Toda en 2025: el terreno no se deprecia, así que no hay vida útil que seguir.",
+        por: "La condición de construir y operar el centro genera costos durante 20 años; la subvención los acompaña (¶18).",
+        t: T("Al 31-dic-2026", [["Terreno", 300, "A"], ["Ingreso diferido (subvención)", 0, "P"]], [["Ingreso por subvenciones 2025", 300], ["Ingreso por subvenciones 2026", 0]]) },
+      { txt: "Nunca: como el terreno no se deprecia, queda diferida indefinidamente.",
+        por: "Una subvención no puede quedar diferida para siempre si la entidad cumple las obligaciones. El ¶18 da la base: la vida del activo que la condición obliga a construir.",
+        t: T("Al 31-dic-2026", [["Terreno", 300, "A"], ["Ingreso diferido (subvención)", 300, "P"]], [["Ingreso por subvenciones 2025", 0], ["Ingreso por subvenciones 2026", 0]]) },
+      { ok: true, txt: "$15 por año durante los 20 años de vida útil del centro de acopio, desde 2026.",
+        por: "Correcto. Es el ejemplo del terreno y el edificio del ¶18.",
+        t: T("Al 31-dic-2026", [["Terreno", 300, "A"], ["Ingreso diferido (subvención)", 285, "P"]], [["Ingreso por subvenciones 2025", 0], ["Ingreso por subvenciones 2026", 15]]) },
+      { txt: "Directo al patrimonio, porque el terreno es un activo permanente.",
+        por: "El enfoque de capital está descartado (¶15).",
+        t: T("Al 31-dic-2026", [["Terreno", 300, "A"], ["Superávit por donaciones", 300, "Pt"]], [["Ingreso por subvenciones 2025", 0], ["Ingreso por subvenciones 2026", 0]]) }
+    ],
+    explicacion: "Cuando la subvención es para un activo no depreciable pero exige obligaciones, se reconoce en los periodos que soportan el costo de cumplirlas (¶18). Aquí la obligación es construir y operar el centro de acopio, así que la subvención se reparte en su vida útil: $300 / 20 = $15 por año desde 2026.",
+    norma: ["18", "12"]
+  },
+
+  /* ---------------- Carpeta 4 ---------------- */
+  {
+    id: "4.1", carpeta: 4, titulo: "El tractor de la Gobernación",
+    hechos: [
+      "En enero de 2025 la Gobernación le entregó a la cooperativa un tractor sin costo, con la condición de usarlo en los cultivos de los asociados.",
+      "Un avalúo independiente fija su valor razonable en $180. La Gobernación lo había comprado por $220 un año antes. Vida útil restante: 6 años. Política: ingreso diferido."
+    ],
+    cliente: "No registró el tractor porque no pagó nada por él.",
+    pregunta: "¿Qué medición permite la NIC 20?",
+    opciones: [
+      { txt: "$220: lo que pagó la Gobernación.",
+        por: "El costo para el gobierno no es una medición permitida. Lo que importa es el valor del bien para quien lo recibe.",
+        t: T("Al 31-dic-2025", [["Tractor, neto", 183.3, "A"], ["Ingreso diferido (subvención)", 183.3, "P"]], [["Depreciación", -36.7], ["Ingreso por subvenciones", 36.7]]) },
+      { ok: true, txt: "$180, su valor razonable; o, como alternativa, un importe nominal para el activo y la subvención.",
+        por: "Correcto. El tablero muestra la opción de valor razonable.",
+        t: T("Al 31-dic-2025", [["Tractor, neto", 150, "A"], ["Ingreso diferido (subvención)", 150, "P"]], [["Depreciación", -30], ["Ingreso por subvenciones", 30]]) },
+      { txt: "$0 obligatoriamente, porque no hubo pago. El registro del cliente está bien.",
+        por: "Un importe nominal es una alternativa explícita del ¶23, pero no registrarlo nunca deja un activo que se usa fuera de los libros.",
+        t: T("Al 31-dic-2025", [["Tractor", 0, "A"]], [["Depreciación", 0]], "El tractor no aparece en el estado de situación.") },
+      { txt: "Solo revelarlo en notas, como asistencia gubernamental.",
+        por: "Un tractor tiene un valor medible, así que es una subvención, no una asistencia sin valor (¶35).",
+        t: T("Al 31-dic-2025", [["Tractor", 0, "A"]], [["Depreciación", 0]], "Solo una nota, sin registro.") }
+    ],
+    explicacion: "Las subvenciones no monetarias se miden normalmente a valor razonable, y el ¶23 permite como alternativa un importe nominal. Con valor razonable y método de ingreso diferido, cada año la depreciación ($30) y el ingreso por subvención ($30) se compensan: el tractor le sale gratis a los resultados.",
+    norma: ["23", "7"]
+  },
+  {
+    id: "4.2", carpeta: 4, titulo: "El crédito de fomento al 2 %",
+    hechos: [
+      "El 1 de enero de 2025 la cooperativa recibió un crédito de fomento de $1.000 a 3 años, para renovar cafetales. Paga intereses del 2 % al final de cada año y el capital al vencimiento.",
+      "Un crédito similar en el mercado costaría 12 % anual."
+    ],
+    cliente: "Débito Bancos $1.000 · Crédito Obligaciones financieras $1.000.",
+    pregunta: "¿Por cuánto se reconoce la subvención implícita al 1 de enero de 2025?",
+    opciones: [
+      { txt: "$0: el crédito se registra por lo recibido y ya está.",
+        por: "El ¶10A trata el beneficio de una tasa menor a la de mercado como subvención.",
+        t: T("Al 1-ene-2025", [["Bancos", 1000, "A"], ["Obligación financiera (NIIF 9)", 1000, "P"], ["Ingreso diferido (subvención)", 0, "P"]], []) },
+      { txt: "$300: 10 puntos de diferencia por 3 años sobre $1.000.",
+        por: "Suma ahorros futuros sin descontarlos. La NIIF 9 mide el préstamo a valor presente.",
+        t: T("Al 1-ene-2025", [["Bancos", 1000, "A"], ["Obligación financiera (NIIF 9)", 700, "P"], ["Ingreso diferido (subvención)", 300, "P"]], []) },
+      { ok: true, txt: "Unos $240: $1.000 menos el valor presente al 12 % de los flujos del crédito.",
+        por: "Correcto. Valor presente de $20, $20 y $1.020 al 12 %: $759,8.",
+        t: T("Al 1-ene-2025", [["Bancos", 1000, "A"], ["Obligación financiera (NIIF 9)", 759.8, "P"], ["Ingreso diferido (subvención)", 240.2, "P"]], []) },
+      { txt: "$1.000: todo el crédito es una subvención porque la tasa es de fomento.",
+        por: "La cooperativa sí tiene que devolver el capital y los intereses del 2 %. Solo la diferencia frente al mercado es subvención.",
+        t: T("Al 1-ene-2025", [["Bancos", 1000, "A"], ["Obligación financiera (NIIF 9)", 0, "P"], ["Ingreso diferido (subvención)", 1000, "P"]], []) }
+    ],
+    explicacion: "Según la NIIF 9, el préstamo se reconoce por el valor presente de sus flujos a la tasa de mercado: 20/1,12 + 20/1,12² + 1.020/1,12³ = $759,8. La diferencia con lo recibido, $240,2, es la subvención (¶10A). Se lleva a resultados según los costos que compensa (¶12), y el préstamo causa intereses al 12 %.",
+    norma: ["10A", "12"]
+  },
+  {
+    id: "4.3", carpeta: 4, titulo: "Los agrónomos que no cobran",
+    hechos: [
+      "Durante 2025, una agencia del gobierno envió agrónomos dos días por semana a asesorar a la cooperativa, sin costo.",
+      "No hay una medida fiable de su valor: según a quién se pregunte, una consultora privada cobraría entre $15 y $60 por un servicio parecido."
+    ],
+    cliente: "Reconoció un ingreso por subvención de $40 y un gasto de asesoría de $40.",
+    pregunta: "¿Cuál es tu dictamen?",
+    opciones: [
+      { txt: "Aprobarlo: el efecto neto en resultados es cero, así que no hace daño.",
+        por: "Cero neto no significa correcto: infla ingresos y gastos con una cifra que no se puede medir.",
+        t: T("Año 2025", [], [["Ingreso por subvenciones", 40], ["Gasto de asesoría", -40]]) },
+      { ok: true, txt: "Ajustarlo: reversar el registro y revelar en notas la naturaleza, el alcance y la duración de la asesoría.",
+        por: "Correcto. Es asistencia del gobierno, no una subvención medible.",
+        t: T("Año 2025", [], [["Ingreso por subvenciones", 0], ["Gasto de asesoría", 0]], "Nota: asesoría técnica gratuita de la agencia, dos días por semana durante 2025.") },
+      { txt: "Ajustarlo: reconocerla por $60, el valor más alto, para no subestimar.",
+        por: "Elegir una cifra de un rango tan amplio no la vuelve fiable.",
+        t: T("Año 2025", [], [["Ingreso por subvenciones", 60], ["Gasto de asesoría", -60]]) },
+      { txt: "Ajustarlo: reversar el registro y no mencionarlo en ningún lado.",
+        por: "Si la asistencia es importante, el ¶36 pide revelarla para que los estados no induzcan a error.",
+        t: T("Año 2025", [], [["Ingreso por subvenciones", 0], ["Gasto de asesoría", 0]], "Sin nota.") }
+    ],
+    explicacion: "La asesoría técnica gratuita es el ejemplo que da la norma de una asistencia que no se puede medir razonablemente (¶35). No se registra, pero sí se revela (¶36 y ¶39b), porque un lector de los estados financieros debería saber que parte del resultado depende de ella.",
+    norma: ["35", "36", "39"]
+  },
+
+  /* ---------------- Carpeta 5 ---------------- */
+  {
+    id: "5.1", carpeta: 5, titulo: "El Fondo pide la plata de vuelta",
+    hechos: [
+      "En enero de 2025 la cooperativa recibió $120 para la nómina de un programa de 2025 a 2027 ($40 por año). Al 31 de diciembre de 2026 ha reconocido $80 en resultados y le quedan $40 de ingreso diferido.",
+      "En diciembre de 2026 el Fondo determina que la cooperativa incumplió y exige devolver los $120 completos."
+    ],
+    cliente: null,
+    pregunta: "¿Cuánto gasto se reconoce en 2026 por la devolución?",
+    opciones: [
+      { txt: "$120: toda la devolución va a gasto.",
+        por: "Quedarían $40 de ingreso diferido en el balance de una subvención que ya no existe.",
+        t: T("Al 31-dic-2026", [["Cuenta por pagar al Fondo", 120, "P"], ["Ingreso diferido (subvención)", 40, "P"]], [["Ingreso por subvenciones 2026", 40], ["Gasto por reembolso", -120]]) },
+      { ok: true, txt: "$80: primero se cancelan los $40 de ingreso diferido y el resto va a gasto.",
+        por: "Correcto. Es el orden que fija el ¶32.",
+        t: T("Al 31-dic-2026", [["Cuenta por pagar al Fondo", 120, "P"], ["Ingreso diferido (subvención)", 0, "P"]], [["Ingreso por subvenciones 2026", 40], ["Gasto por reembolso", -80]]) },
+      { txt: "$0 en 2026: se reexpresan 2025 y 2026 como corrección de un error.",
+        por: "No hubo un error: la contabilidad era correcta con la información de su momento. Es un cambio de estimación (NIC 8).",
+        t: T("Al 31-dic-2026", [["Cuenta por pagar al Fondo", 120, "P"], ["Utilidades acumuladas (reexpresión)", -80, "Pt"]], [["Ingreso por subvenciones 2026 (reexpresado)", 0], ["Gasto por reembolso", 0]]) },
+      { txt: "$0 en resultados: los $120 se cargan directo al patrimonio.",
+        por: "La subvención entró por resultados y sale por resultados.",
+        t: T("Al 31-dic-2026", [["Cuenta por pagar al Fondo", 120, "P"], ["Ingreso diferido (subvención)", 40, "P"], ["Utilidades acumuladas", -120, "Pt"]], [["Ingreso por subvenciones 2026", 40], ["Gasto por reembolso", 0]]) }
+    ],
+    explicacion: "Una subvención que se vuelve reembolsable es un cambio de estimación (¶32): afecta el periodo en que se conoce, sin reexpresar. El reembolso se aplica primero contra el ingreso diferido pendiente ($40), y lo que exceda ($80) va directo a resultados. Esos $80 son justo lo que ya se había reconocido como ingreso en 2025 y 2026.",
+    norma: ["32"]
+  },
+  {
+    id: "5.2", carpeta: 5, titulo: "La secadora, cuatro años después",
+    hechos: [
+      "Volvemos a la secadora del caso 3.2: costo $500, subvención $200 restada del activo, vida útil 10 años. Se deprecia $30 por año.",
+      "El 31 de diciembre de 2028, tras cuatro años de depreciación, la cooperativa debe devolver los $200 por incumplir. El valor en libros antes de la devolución es $180."
+    ],
+    cliente: null,
+    pregunta: "¿Qué cargo inmediato a resultados genera la devolución?",
+    opciones: [
+      { txt: "$200: todo lo devuelto va a gasto.",
+        por: "El ¶32 manda a reconstruir el activo: se devuelve al valor que tendría sin la subvención.",
+        t: T("Al 31-dic-2028, tras la devolución", [["Secadora, neto", 180, "A"], ["Cuenta por pagar al Fondo", 200, "P"]], [["Gasto por reembolso y depreciación", -200]]) },
+      { ok: true, txt: "$80: la depreciación adicional que se habría reconocido sin la subvención (4 años × $20).",
+        por: "Correcto. El activo queda en $300, lo que valdría sin la subvención.",
+        t: T("Al 31-dic-2028, tras la devolución", [["Secadora, neto", 300, "A"], ["Cuenta por pagar al Fondo", 200, "P"]], [["Depreciación adicional acumulada", -80]]) },
+      { txt: "$0: solo se aumenta el valor en libros de la secadora en $200.",
+        por: "Faltaría la depreciación que nunca se cargó: el activo quedaría en $380, por encima de lo que vale sin la subvención.",
+        t: T("Al 31-dic-2028, tras la devolución", [["Secadora, neto", 380, "A"], ["Cuenta por pagar al Fondo", 200, "P"]], [["Depreciación adicional acumulada", 0]]) },
+      { txt: "$120: la parte de la subvención que aún no se había amortizado.",
+        por: "Los $120 pendientes se recuperan en el activo. Lo que va a resultados es lo que ya se había beneficiado: $80.",
+        t: T("Al 31-dic-2028, tras la devolución", [["Secadora, neto", 260, "A"], ["Cuenta por pagar al Fondo", 200, "P"]], [["Gasto por reembolso", -120]]) }
+    ],
+    explicacion: "Con el método de deducción, el reembolso aumenta el valor en libros del activo en $200 (de $180 a $380), y la depreciación que se habría cargado sin la subvención (4 × $20 = $80) va de inmediato a resultados (¶32). El activo queda en $300: $500 menos 4 años de depreciación de $50. Con el método de ingreso diferido el resultado es el mismo: se cancelan los $120 de diferido y los $80 restantes van a gasto.",
+    norma: ["32", "27"]
+  },
+  {
+    id: "5.3", carpeta: 5, titulo: "Revisión final: encuentra el error",
+    hechos: [
+      "Antes de firmar, revisas el borrador de la nota de subvenciones que preparó la cooperativa. Tres afirmaciones están bien. Una tiene un error que afecta las cifras."
+    ],
+    cliente: null,
+    pregunta: "¿Qué afirmación contiene el error?",
+    opciones: [
+      { txt: "«El préstamo condonable de $150 se trata como subvención porque existe seguridad razonable de cumplir las condiciones de condonación.»",
+        por: "Esta está bien: es exactamente lo que pide el ¶10. El tablero muestra el ajuste que propondrías, y estaría equivocado.",
+        t: T("Ajuste que propondrías", [["Ingreso diferido (subvención)", -100, "P"], ["Obligaciones financieras", 150, "P"]], [["Ingreso por subvenciones", -50]]) },
+      { ok: true, txt: "«El subsidio de $120 para los técnicos (julio 2025 a junio 2026) se reconoció completo como ingreso de 2025, al recibirse.»",
+        por: "Correcto. Seis de los doce meses de salario son de 2026: la utilidad de 2025 está sobrestimada en $60.",
+        t: T("Ajuste que propondrías", [["Ingreso diferido (subvención)", 60, "P"]], [["Ingreso por subvenciones", -60]]) },
+      { txt: "«El reembolso de $40 por capacitación se presenta restado del gasto correspondiente.»",
+        por: "Esta está bien: es una de las dos presentaciones del ¶29. Cambiarla no mueve el resultado.",
+        t: T("Ajuste que propondrías", [], [["Gasto de capacitación", -40], ["Otros ingresos: subvenciones", 40]], "Solo cambia la presentación; el resultado queda igual.") },
+      { txt: "«La asesoría técnica gratuita no se reconoce en los estados financieros; se describe en las notas.»",
+        por: "Esta está bien: es el tratamiento del ¶35 y el ¶36.",
+        t: T("Ajuste que propondrías", [], [["Ingreso por subvenciones", 40], ["Gasto de asesoría", -40]]) }
+    ],
+    explicacion: "Es el error del caso 2.1, ahora dentro de una nota que parece en orden. La subvención compensa salarios de julio de 2025 a junio de 2026, así que en 2025 solo corresponden $60. El ajuste: débito Ingreso por subvenciones $60, crédito Ingreso diferido $60. Sin ese ajuste, la utilidad de 2025 queda sobrestimada en $60.",
+    norma: ["12", "8", "39"]
+  }
+];
+
+/* =====================================================================
+   MOTOR DEL JUEGO
+   ===================================================================== */
+
+const $ = (s) => document.querySelector(s);
+const LETRAS = ["1", "2", "3", "4"];
+const RECORD_KEY = "auditoria-nic20-record";
+const VIDAS = 3;
+
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem(RECORD_KEY)) || null; } catch { return null; } },
+  set(v) { try { localStorage.setItem(RECORD_KEY, JSON.stringify(v)); } catch {} }
+};
+
+let modo = "examen";
+let S = null; // estado de la partida
+
+function nuevaPartida() {
+  S = {
+    modo,
+    i: 0,
+    vidas: VIDAS,
+    puntos: 0,
+    racha: 0,
+    mejorRacha: 0,
+    res: [],             // { id, ok }
+    perm: CASOS.map(c => barajar(c.opciones.map((_, k) => k))),
+    sel: null,
+    hecho: false,
+    previo: null         // último tablero dibujado, para resaltar cambios
+  };
+}
+
+function barajar(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function fmt(v) {
+  if (v === 0) return "—";
+  const abs = Math.abs(v);
+  const s = abs.toLocaleString("es-CO", { minimumFractionDigits: Number.isInteger(abs) ? 0 : 1, maximumFractionDigits: 1 });
+  return v < 0 ? `(${s})` : s;
+}
+
+function mostrar(id) {
+  for (const s of ["inicio", "interludio", "ronda", "final"]) $("#" + s).hidden = s !== id;
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Portada ---------- */
+function pintarPortada() {
+  $("#indice").innerHTML = CARPETAS.map(c => `
+    <li><span class="ref">C-${c.n}</span>
+      <span><span class="t">${c.titulo}</span><span class="s">${c.pregunta}</span></span>
+      <span class="p">${c.parrafos}</span></li>`).join("");
+  const r = store.get();
+  $("#best-inicio").textContent = r ? `Tu récord: ${r.puntos.toLocaleString("es-CO")} puntos (${r.aciertos}/15)` : "";
+}
+
+document.querySelectorAll(".modo").forEach(b => b.addEventListener("click", () => {
+  modo = b.dataset.modo;
+  document.querySelectorAll(".modo").forEach(x => x.setAttribute("aria-checked", String(x === b)));
+}));
+
+$("#btn-empezar").addEventListener("click", () => { nuevaPartida(); abrirCaso(); });
+$("#btn-abrir").addEventListener("click", () => { mostrar("ronda"); pintarCaso(); });
+$("#btn-otra").addEventListener("click", () => { nuevaPartida(); abrirCaso(); });
+$("#btn-inicio").addEventListener("click", () => { pintarPortada(); mostrar("inicio"); });
+
+/* ---------- Flujo ---------- */
+function abrirCaso() {
+  const caso = CASOS[S.i];
+  const anterior = CASOS[S.i - 1];
+  if (!anterior || anterior.carpeta !== caso.carpeta) {
+    const c = CARPETAS[caso.carpeta - 1];
+    $("#int-tab").textContent = `Carpeta C-${c.n} de 5`;
+    $("#int-parrafos").textContent = `NIC 20 · ${c.parrafos}`;
+    $("#int-titulo").textContent = c.titulo;
+    $("#int-pregunta").textContent = c.pregunta;
+    $("#int-claves").innerHTML = c.claves.map(k => `<li>${k}</li>`).join("");
+    mostrar("interludio");
+    $("#btn-abrir").focus();
+  } else {
+    mostrar("ronda");
+    pintarCaso();
+  }
+}
+
+function pintarHud() {
+  $("#progress").innerHTML = CASOS.map((c, k) => {
+    const r = S.res[k];
+    const cls = r ? (r.ok ? "ok" : "bad") : (k === S.i ? "now" : "");
+    return `<i class="${cls}" title="Caso ${c.id}"></i>`;
+  }).join("");
+  $("#vidas").innerHTML = S.modo === "examen"
+    ? Array.from({ length: VIDAS }, (_, k) => `<b class="${k < S.vidas ? "" : "off"}" aria-hidden="true">✓</b>`).join("") +
+      `<span class="label" style="margin-left:4px">${S.vidas} ${S.vidas === 1 ? "firma" : "firmas"}</span>`
+    : `<span class="label">Práctica</span>`;
+  $("#puntos").textContent = S.puntos.toLocaleString("es-CO");
+}
+
+function pintarCaso() {
+  const caso = CASOS[S.i];
+  const c = CARPETAS[caso.carpeta - 1];
+  S.sel = null; S.hecho = false; S.previo = null;
+  pintarHud();
+  $("#caso-tab").textContent = `C-${c.n} · ${c.titulo}`;
+  $("#caso-ref").textContent = `Papel de trabajo PT ${caso.id} · caso ${S.i + 1} de ${CASOS.length}`;
+  $("#caso-titulo").textContent = caso.titulo;
+  $("#caso-hechos").innerHTML = caso.hechos.map(h => `<p>${h}</p>`).join("");
+  const cl = $("#caso-cliente");
+  if (caso.cliente) {
+    cl.hidden = false;
+    cl.innerHTML = `<span class="label">Lo que registró la cooperativa</span><span>${caso.cliente}</span>`;
+  } else cl.hidden = true;
+  $("#caso-pregunta").textContent = caso.pregunta;
+
+  $("#opciones").innerHTML = S.perm[S.i].map((k, pos) => `
+    <button class="op" role="radio" aria-checked="false" data-k="${k}" id="op-${pos}">
+      <span class="k">${LETRAS[pos]}</span><span>${caso.opciones[k].txt}</span>
+    </button>`).join("");
+  document.querySelectorAll(".op").forEach(b => b.addEventListener("click", () => elegir(Number(b.dataset.k))));
+
+  $("#btn-dictamen").disabled = true;
+  $("#btn-dictamen").textContent = "Emitir dictamen";
+  $("#feedback").hidden = true;
+  $("#tab-titulo").textContent = "Tablero contable";
+  $("#tab-sub").textContent = "Elige una opción para ver cómo quedarían los estados financieros.";
+  $("#tab-cuerpo").innerHTML = `<p class="vacio">Cifras en millones de COP. Los valores negativos van entre paréntesis.</p>`;
+}
+
+function elegir(k) {
+  if (S.hecho) return;
+  S.sel = k;
+  document.querySelectorAll(".op").forEach(b => b.setAttribute("aria-checked", String(Number(b.dataset.k) === k)));
+  $("#btn-dictamen").disabled = false;
+  const op = CASOS[S.i].opciones[k];
+  $("#tab-titulo").textContent = `Si eliges esta opción · ${op.t.titulo}`;
+  $("#tab-sub").textContent = "Cifras en millones de COP. Cambia de opción y mira qué se mueve.";
+  pintarTablero(op.t, null);
+}
+
+function confirmar() {
+  if (S.hecho || S.sel === null) return;
+  const caso = CASOS[S.i];
+  const elegida = caso.opciones[S.sel];
+  const kOk = caso.opciones.findIndex(o => o.ok);
+  const ok = !!elegida.ok;
+  S.hecho = true;
+
+  let ganados = 0;
+  if (ok) {
+    S.racha++;
+    S.mejorRacha = Math.max(S.mejorRacha, S.racha);
+    ganados = 100 + Math.min(S.racha - 1, 4) * 25;
+    S.puntos += ganados;
+  } else {
+    S.racha = 0;
+    if (S.modo === "examen") S.vidas--;
+  }
+  S.res[S.i] = { id: caso.id, ok };
+  pintarHud();
+
+  document.querySelectorAll(".op").forEach(b => {
+    const k = Number(b.dataset.k);
+    b.disabled = true;
+    if (k === kOk) b.classList.add("es-ok");
+    else if (k === S.sel) b.classList.add("es-mal");
+  });
+
+  // Tablero: si falló, tu registro contra el correcto
+  $("#tab-titulo").textContent = ok ? `Tablero correcto · ${elegida.t.titulo}` : `Tu registro contra el correcto · ${elegida.t.titulo}`;
+  $("#tab-sub").textContent = ok ? "Así quedan los estados financieros con tu dictamen." : "En rojo, las cifras donde tu registro se aparta del correcto.";
+  pintarTablero(ok ? elegida.t : caso.opciones[kOk].t, ok ? null : elegida.t);
+
+  const fin = S.modo === "examen" && S.vidas <= 0;
+  const ultimo = S.i === CASOS.length - 1;
+  const fb = $("#feedback");
+  fb.hidden = false;
+  fb.innerHTML = `
+    <div class="veredicto">
+      <span class="sello ${ok ? "ok" : "mal"}">${ok ? "Cotejado ✓" : "Hallazgo ✗"}</span>
+      ${ok ? `<span class="pts">+${ganados}${S.racha > 1 ? ` · racha ×${S.racha}` : ""}</span>` : `<span class="pts">${S.modo === "examen" ? `Pierdes una firma. Te ${S.vidas === 1 ? "queda" : "quedan"} ${S.vidas}.` : "Sin puntos en este caso."}</span>`}
+    </div>
+    <div class="fb-grid">
+      <div class="fb-texto">
+        <p><strong>${elegida.por}</strong></p>
+        <p>${caso.explicacion}</p>
+        ${caso.lab ? '<div id="lab-slot"></div>' : ""}
+      </div>
+      <div class="norma">
+        <span class="label">Fundamento</span>
+        ${caso.norma.map(p => `<blockquote><b>NIC 20 · ¶${p} (síntesis)</b>${NORMA[p]}</blockquote>`).join("")}
+      </div>
+    </div>
+    <div class="acciones">
+      <button class="btn" id="btn-sig">${fin ? "Ver el informe" : ultimo ? "Cerrar el expediente" : "Siguiente caso"}</button>
+    </div>`;
+  if (caso.lab) montarLab($("#lab-slot"));
+  $("#btn-sig").addEventListener("click", siguiente);
+  $("#btn-dictamen").disabled = true;
+  fb.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  $("#btn-sig").focus({ preventScroll: true });
+}
+
+function siguiente() {
+  if (S.modo === "examen" && S.vidas <= 0) return terminar(true);
+  if (S.i >= CASOS.length - 1) return terminar(false);
+  S.i++;
+  abrirCaso();
+}
+
+$("#btn-dictamen").addEventListener("click", confirmar);
+
+document.addEventListener("keydown", (e) => {
+  if ($("#ronda").hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+  const n = LETRAS.indexOf(e.key);
+  if (n >= 0 && !S.hecho) {
+    const b = $("#op-" + n);
+    if (b) { b.click(); b.focus(); }
+  } else if (e.key === "Enter") {
+    if (document.activeElement && document.activeElement.tagName === "BUTTON" && !document.activeElement.classList.contains("op")) return;
+    e.preventDefault();
+    S.hecho ? siguiente() : confirmar();
+  }
+});
+
+/* ---------- Tablero ---------- */
+function pintarTablero(t, comparar) {
+  const dos = !!comparar;
+  const filas = (lista, otra, conClase) => {
+    const claves = lista.map(x => x[0]);
+    if (otra) for (const x of otra) if (!claves.includes(x[0])) claves.push(x[0]);
+    return claves.map(k => {
+      const a = lista.find(x => x[0] === k);
+      const b = otra ? otra.find(x => x[0] === k) : null;
+      return { k, v: a ? a[1] : 0, tu: b ? b[1] : (otra ? 0 : null), clase: (a || b)[2] };
+    });
+  };
+  const celdas = (f, clave) => {
+    const prev = S.previo && S.previo[clave];
+    const flash = !dos && prev !== undefined && prev !== f.v ? " flash" : "";
+    if (!dos) return `<td class="v${flash}">${fmt(f.v)}</td>`;
+    const dif = Math.abs(f.tu - f.v) > 0.001 ? " dif" : "";
+    return `<td class="v${dif}">${fmt(f.tu)}</td><td class="v">${fmt(f.v)}</td>`;
+  };
+  const nuevoPrevio = {};
+  const cab = dos ? `<th class="v">Tu registro</th><th class="v">Correcto</th>` : `<th class="v">COP M</th>`;
+  let html = "";
+
+  const esf = filas(t.esf, comparar && comparar.esf);
+  if (esf.length) {
+    html += `<div class="tabla-wrap"><table class="libro"><thead><tr><th>Estado de situación financiera</th>${cab}</tr></thead><tbody>`;
+    for (const [cl, nombre] of [["A", "Activo"], ["P", "Pasivo"], ["Pt", "Patrimonio"]]) {
+      const g = esf.filter(f => f.clase === cl);
+      if (!g.length) continue;
+      html += `<tr class="grupo"><td colspan="${dos ? 3 : 2}">${nombre}</td></tr>`;
+      for (const f of g) { const key = "esf:" + f.k; nuevoPrevio[key] = f.v; html += `<tr><td>${f.k}</td>${celdas(f, key)}</tr>`; }
+    }
+    html += `</tbody></table></div>`;
+  }
+
+  const er = filas(t.er, comparar && comparar.er);
+  if (er.length) {
+    const tot = er.reduce((s, f) => s + f.v, 0);
+    const totTu = dos ? er.reduce((s, f) => s + f.tu, 0) : null;
+    html += `<div class="tabla-wrap"><table class="libro"><thead><tr><th>Estado de resultados</th>${cab}</tr></thead><tbody>`;
+    for (const f of er) { const key = "er:" + f.k; nuevoPrevio[key] = f.v; html += `<tr><td>${f.k}</td>${celdas(f, key)}</tr>`; }
+    nuevoPrevio["er:total"] = tot;
+    const totF = { v: tot, tu: totTu };
+    html += `<tr class="total"><td>Efecto en resultados</td>${celdas(totF, "er:total")}</tr></tbody></table></div>`;
+  }
+
+  const notas = [t.nota && (dos ? `Correcto: ${t.nota}` : t.nota), dos && comparar.nota && `Tu registro: ${comparar.nota}`].filter(Boolean);
+  html += notas.map(n => `<p class="nota-tab">${n}</p>`).join("");
+  $("#tab-cuerpo").innerHTML = html || `<p class="vacio">Sin efecto en los estados financieros.</p>`;
+  S.previo = dos ? null : nuevoPrevio;
+}
+
+/* ---------- Laboratorio: ingreso diferido vs deducción ---------- */
+function montarLab(slot) {
+  slot.innerHTML = `
+    <div class="lab">
+      <span class="label">Laboratorio · secadora de $500</span>
+      <div class="controles">
+        <label for="lab-s">Subvención <output id="lab-s-o"></output><input id="lab-s" type="range" min="0" max="500" step="10" value="200"></label>
+        <label for="lab-v">Vida útil (años) <output id="lab-v-o"></output><input id="lab-v" type="range" min="2" max="20" step="1" value="10"></label>
+        <label for="lab-a">Año que miras <output id="lab-a-o"></output><input id="lab-a" type="range" min="1" max="10" step="1" value="1"></label>
+      </div>
+      <div class="metodos" id="lab-metodos"></div>
+      <p class="conclusion" id="lab-conc"></p>
+    </div>`;
+  const s = $("#lab-s"), v = $("#lab-v"), a = $("#lab-a");
+  const r1 = (x) => Math.round(x * 10) / 10;
+  const tabla = (titulo, filasEsf, filasEr) => `
+    <div class="tabla-wrap"><table class="libro">
+      <thead><tr><th>${titulo}</th><th class="v">COP M</th></tr></thead>
+      <tbody>
+        <tr class="grupo"><td colspan="2">Estado de situación</td></tr>
+        ${filasEsf.map(([k, x]) => `<tr><td>${k}</td><td class="v">${fmt(r1(x))}</td></tr>`).join("")}
+        <tr class="grupo"><td colspan="2">Resultados del año</td></tr>
+        ${filasEr.map(([k, x]) => `<tr><td>${k}</td><td class="v">${fmt(r1(x))}</td></tr>`).join("")}
+        <tr class="total"><td>Efecto en resultados</td><td class="v">${fmt(r1(filasEr.reduce((t, f) => t + f[1], 0)))}</td></tr>
+      </tbody></table></div>`;
+  const calc = () => {
+    const S0 = +s.value, V = +v.value;
+    a.max = V; if (+a.value > V) a.value = V;
+    const A = +a.value, C = 500;
+    $("#lab-s-o").textContent = `$${S0}`; $("#lab-v-o").textContent = V; $("#lab-a-o").textContent = A;
+    const difer = tabla("Ingreso diferido",
+      [["Secadora, neto", C - C / V * A], ["Ingreso diferido", S0 - S0 / V * A]],
+      [["Depreciación", -C / V], ["Ingreso por subvención", S0 / V]]);
+    const deduc = tabla("Deducción del activo",
+      [["Secadora, neto", (C - S0) - (C - S0) / V * A]],
+      [["Depreciación", -(C - S0) / V]]);
+    $("#lab-metodos").innerHTML = difer + deduc;
+    const neto = r1((C - S0) / V);
+    $("#lab-conc").innerHTML = `En los dos métodos el resultado del año ${A} es <strong class="num">${fmt(-neto)}</strong>. Lo que cambia es el estado de situación: con ingreso diferido el activo y el pasivo se ven más grandes.`;
+  };
+  [s, v, a].forEach(el => el.addEventListener("input", calc));
+  calc();
+}
+
+/* ---------- Final ---------- */
+function terminar(retirado) {
+  const aciertos = S.res.filter(r => r && r.ok).length;
+  const revisados = S.res.filter(Boolean).length;
+  const rango =
+    aciertos >= 14 ? ["Socia o socio de auditoría", "Tu expediente pasa la revisión de calidad sin observaciones. Puedes firmar el dictamen."] :
+    aciertos >= 11 ? ["Gerente de auditoría", "Buen expediente. Revisa los casos marcados antes de firmar: ahí está lo que te faltó."] :
+    aciertos >= 8  ? ["Senior de auditoría", "Tienes la lógica de la norma, pero varios tratamientos no se sostienen. Repasa los párrafos de abajo."] :
+                     ["Asistente de auditoría", "El socio te devuelve el expediente. Repasa los párrafos de abajo y vuelve a intentarlo."];
+
+  $("#fin-estado").textContent = retirado
+    ? `Encargo suspendido · tres hallazgos en tu propio trabajo · revisaste ${revisados} de ${CASOS.length} casos`
+    : `Expediente completo · ${CASOS.length} casos revisados · modo ${S.modo}`;
+  $("#fin-rango").textContent = retirado ? "La firma te retiró del encargo" : rango[0];
+  $("#fin-frase").textContent = retirado
+    ? "Con tres dictámenes que no se sostienen, el socio reasigna el expediente. Estudia los párrafos de abajo y vuelve a abrirlo."
+    : rango[1];
+  $("#fin-puntos").textContent = S.puntos.toLocaleString("es-CO");
+  $("#fin-aciertos").textContent = `${aciertos}/${CASOS.length}`;
+  $("#fin-racha").textContent = S.mejorRacha;
+
+  const prev = store.get();
+  if (!prev || S.puntos > prev.puntos) store.set({ puntos: S.puntos, aciertos, fecha: new Date().toISOString().slice(0, 10) });
+  const rec = store.get();
+  $("#fin-record").textContent = rec ? rec.puntos.toLocaleString("es-CO") : S.puntos.toLocaleString("es-CO");
+
+  $("#fin-carpetas").innerHTML = `
+    <thead><tr><th>Carpeta</th><th class="v">Aciertos</th></tr></thead>
+    <tbody>${CARPETAS.map(c => {
+      const casos = CASOS.map((x, k) => ({ x, r: S.res[k] })).filter(o => o.x.carpeta === c.n);
+      const ok = casos.filter(o => o.r && o.r.ok).length;
+      const vistos = casos.filter(o => o.r).length;
+      return `<tr><td>C-${c.n} · ${c.titulo}</td><td class="v">${vistos ? `${ok}/${casos.length}` : "sin revisar"}</td></tr>`;
+    }).join("")}</tbody>`;
+
+  const fallados = CASOS.filter((c, k) => S.res[k] && !S.res[k].ok);
+  $("#fin-repaso").innerHTML = fallados.length
+    ? `<span class="label">Para repasar</span><ul>${fallados.map(c =>
+        `<li><strong>PT ${c.id} · ${c.titulo}.</strong> NIC 20 ${c.norma.map(p => "¶" + p).join(", ")}.</li>`).join("")}</ul>`
+    : `<span class="label">Para repasar</span><p>Nada. Todos tus dictámenes se sostienen.</p>`;
+  mostrar("final");
+  $("#btn-otra").focus();
+}
+
+/* ---------- Arranque ---------- */
+pintarPortada();
+</script>
+</body>
+</html>
